@@ -5,13 +5,13 @@ import mediapipe as mp
 import pickle
 import numpy as np
 
-# Pastikan path model betul. Kalau model.p ada dalam folder yang sama:
+# Load model - Pastikan fail model.p ada kat GitHub
 try:
     with open('model.p', 'rb') as f:
         model_dict = pickle.load(f)
     model = model_dict['model']
 except Exception as e:
-    st.error(f"Model tak jumpa: {e}")
+    st.error(f"Gagal muat naik model: {e}")
 
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_confidence=0.5)
@@ -36,15 +36,16 @@ def video_frame_callback(frame):
             if len(data_aux) == 42:
                 prediction = model.predict([np.asarray(data_aux)])
                 char = str(prediction[0])
-                cv2.putText(img, f"Detected: {char}", (30, 50), 
-                            cv2.FONT_HERSHEY_DUPLEX, 1.2, (0, 255, 127), 2)
+                cv2.putText(img, f"Detected: {char}", (30, 80), 
+                            cv2.FONT_HERSHEY_DUPLEX, 2.0, (0, 255, 127), 3)
 
     return frame.from_ndarray(img, format="bgr24")
 
 st.title("🤟 ASL Real-Time Translator")
+st.write("Sila benarkan akses kamera untuk memulakan.")
 
 webrtc_streamer(
-    key="asl-translator",
+    key="asl",
     video_frame_callback=video_frame_callback,
     rtc_configuration={
         "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
